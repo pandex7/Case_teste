@@ -42,7 +42,7 @@ def get_followers_details(username):
                 'public_repos': follower_data['public_repos'],
                 'followers': follower_data['followers'],
                 'following': follower_data['following'],
-                'created_at': follower_data['created_at']
+                'created_at': datetime.strptime(follower_data['created_at'], "%Y-%m-%dT%H:%M:%SZ").strftime("%d/%m/%Y")
             })
 
         return follower_details
@@ -69,15 +69,15 @@ if followers_details:
     df = df.withColumn('public_repos', col('public_repos').cast(LongType()))
     df = df.withColumn('followers', col('followers').cast(LongType()))
     df = df.withColumn('following', col('following').cast(LongType()))
-
+    df = df.withColumn('company', regexp_replace('company', '^@', ''))
 
     # Salvar como CSV
-    #df.coalesce(1).write.option("header", "true").csv("github_followers.csv")
-    df.show()
+    df.coalesce(1).write.option("header", "true").csv("github_followers.csv")
+    
     # Mensagem de conclusão
     logging.info(f"Dados salvos com sucesso")
 
-    # Encerrando a sessão do Spark
+    # Encerrando o Spark
     spark.stop()
 
 else:
